@@ -8,18 +8,14 @@ let path = require('path');
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 //app.use(cors())
+//static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+let indexRouter = require('./routes/index')
+app.use('/', indexRouter)
 
- const indexRouter = require('./routes/index')
-// const gisRouter = require('./routes/gis')
-// const formsRouter = require('./routes/forms')
-
- app.use('/', indexRouter)
-// app.use('/api/gis', gisRouter)
-// app.use('/api/forms',formsRouter)
-
-// require('./data/polygon-manager')
+let formsRouter = require('./routes/forms')
+app.use('/', formsRouter)
 
 
 module.exports = app;

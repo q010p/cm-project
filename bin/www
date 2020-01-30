@@ -20,17 +20,26 @@ app.set('port', port);
 
 /**
  * Create HTTP server.
+ * and connect to database
  */
+var server
+db = require('../data/db')
+db.connect(process.env.mongoUrl, function (error) {
+  if (error) {
+    debug('Error while connecting to database')
+    throw error;
+  }
+  server = http.createServer(app);
 
-var server = http.createServer(app);
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
 
-/**
- * Listen on provided port, on all network interfaces.
- */
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+})
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
