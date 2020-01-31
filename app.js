@@ -12,10 +12,10 @@ app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')));
 
 let indexRouter = require('./routes/index')
-app.use('/', indexRouter)
+app.use('/api', indexRouter)
 
 let formsRouter = require('./routes/forms')
-app.use('/', formsRouter)
+app.use('/api', formsRouter)
 
 
 module.exports = app;
