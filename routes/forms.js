@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router();
-const debug = require('debug')(`${process.env.name}:forms`)
+const debug = require('debug')(`${process.env.name}:forms-router`)
 
 const db = require('../database/db')
 

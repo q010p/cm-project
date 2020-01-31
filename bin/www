@@ -23,7 +23,7 @@ app.set('port', port);
  * and connect to database
  */
 var server
-db = require('../data/db')
+db = require('../database/db')
 db.connect(process.env.mongoUrl, function (error) {
   if (error) {
     debug('Error while connecting to database')

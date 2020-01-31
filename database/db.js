@@ -16,13 +16,17 @@ exports.connect = function (url, done) {
         debug('connected to database ')
 
         state.db.createCollection("forms", function (err, res) {
-            if (err) throw err;
-            debug("Collection forms is now on db!");
+            if (err) throw err
+            debug("Collection forms is now on db!")
         });
         state.db.createCollection("users", function (err, res) {
-            if (err) throw err;
-            debug("Collection users is now on db!");
+            if (err) throw err
+            debug("Collection users is now on db!")
         });
+        state.db.createCollection("polygons",function(err,res){
+            if(err) throw err;
+            debug("Collection polygons is now on db")
+        })
         done()
     })
 }

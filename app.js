@@ -17,5 +17,8 @@ app.use('/api', indexRouter)
 let formsRouter = require('./routes/forms')
 app.use('/api', formsRouter)
 
+let polygonsRouter = require('./routes/polygons')
+app.use('/api', polygonsRouter)
+
 
 module.exports = app;
