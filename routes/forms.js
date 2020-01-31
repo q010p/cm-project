@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router();
 const debug = require('debug')(`${process.env.name}:forms`)
 
-const db = require('../data/db')
+const db = require('../database/db')
 
 
 router.get('/forms', function (req, res) {
