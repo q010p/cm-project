@@ -6,7 +6,6 @@
 
 //initialize environment variables from .env file
 require('dotenv').config()
-var app = require('../app')
 var debug = require('debug')(`${process.env.name}:server`);
 var http = require('http');
 
@@ -14,21 +13,22 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
 
-app.set('port', port);
 
 /**
  * Create HTTP server.
  * and connect to database
  */
 var server
+var app
+var port
 db = require('../database/db')
 db.connect(process.env.mongoUrl, function (error) {
   if (error) {
     debug('Error while connecting to database')
     throw error;
   }
+  app = createApp()
   server = http.createServer(app);
 
   /**
@@ -39,6 +39,13 @@ db.connect(process.env.mongoUrl, function (error) {
   server.on('error', onError);
   server.on('listening', onListening);
 })
+
+function createApp(){
+  app = require('../app')
+  port = normalizePort(process.env.PORT || '3000');
+  app.set('port', port);
+  return app;
+}
 
 
 /**
