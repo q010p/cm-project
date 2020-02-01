@@ -1,5 +1,4 @@
 const express = require('express');
-//const cors = require('cors')
 const app = express();
 let path = require('path');
 
@@ -9,7 +8,8 @@ const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-//app.use(cors())
+const cors = require('cors')
+app.use(cors())
 //static folder
 app.use(express.static(path.join(__dirname, 'public')));
 

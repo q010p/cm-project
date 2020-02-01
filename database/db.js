@@ -25,7 +25,7 @@ exports.connect = function (url, done) {
         });
         state.db.createCollection("polygons",function(err,res){
             if(err) throw err;
-            debug("Collection polygons is now on db")
+            debug("Collection polygons is now on db!")
         })
         done()
     })
