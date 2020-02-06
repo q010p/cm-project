@@ -14,17 +14,17 @@ router.use(function (req, res, next) {
 
     let token = req.header('Authorization')
 
-   // if (token != undefined && token.startsWith(TOKEN_PREFIX)){}
-        //token = token.substring(TOKEN_PREFIX.length, token.length - 1)
-    if(token==undefined) {
+    if (token != undefined && token.startsWith(TOKEN_PREFIX)) {
+        token = token.substring(TOKEN_PREFIX.length, token.length - 1)
+    } else {
         putPermissionsToReq(req, roles.VISITOR)
         next()
         return
     }
     let tokenObject;
-    try{
-        tokenObject=ObjectId(token);
-    }catch(exception){
+    try {
+        tokenObject = ObjectId(token);
+    } catch (exception) {
         putPermissionsToReq(req, roles.VISITOR)
         next()
         return

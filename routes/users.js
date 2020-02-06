@@ -5,12 +5,17 @@ const db = require('../database/db').get()
 const permit = require('../security/permit-func')
 const roles = require('../security/authority-roles')
 
-router.post('/authenticate', permit(roles.VISITOR, roles.ADMIN, roles.FIELD_AGENT, roles.CONTROL_CENTER_AGENT), function (req, res) {
+router.post('/authenticate', permit(roles.VISITOR, roles.ADMIN, roles.FIELD_AGENT, roles.CONTROL_CENTER_AGENT), function(req, res) {
     debug(`post request to ${req.url} with below body: \n${JSON.stringify(req.body)}`)
-    db.collection('users').find({ phone: { $eq: req.body.phone } }).toArray()
+    db.collection('users').findOne({ phone: { $eq: req.body.phone } }, {})
         .then((value) => {
-            debug(value)
-            res.send(value)
+            if (!value)
+                res.status(400).send({ message: "phone number doesn\'t exists" })
+            else
+                res.send({
+                    token: value._id,
+                    role: value.permission
+                })
         })
         .catch((reason) => {
             debug(reason)
@@ -18,7 +23,7 @@ router.post('/authenticate', permit(roles.VISITOR, roles.ADMIN, roles.FIELD_AGEN
         })
 })
 
-router.post('/signup', permit(roles.VISITOR, roles.ADMIN, roles.FIELD_AGENT, roles.CONTROL_CENTER_AGENT), function (req, res) {
+router.post('/signup', permit(roles.VISITOR, roles.ADMIN, roles.FIELD_AGENT, roles.CONTROL_CENTER_AGENT), function(req, res) {
     debug(`post request to ${req.baseUrl + req.url} with below body :\n${JSON.stringify(req.body)}`)
     let phone = req.body.phone
     let name = req.body.name
@@ -38,13 +43,13 @@ router.post('/signup', permit(roles.VISITOR, roles.ADMIN, roles.FIELD_AGENT, rol
             })
         })
         .then((value) => {
-            res.send({token:value.insertedId.toString()})
+            res.send({ token: value.insertedId.toString() })
         })
         .catch((reason) => {
             debug(reason)
             res.send(reason)
         })
-        .catch((reason)=>{
+        .catch((reason) => {
             console.log()
         })
 })

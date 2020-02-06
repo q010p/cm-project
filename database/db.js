@@ -13,21 +13,29 @@ exports.connect = function (url, done) {
     MongoClient.connect(url, function (err, db) {
         if (err) return done(err)
         state.db = db.db(process.env['db-nam'])
+        done()
+
         debug('connected to database ')
 
         state.db.createCollection("forms", function (err, res) {
             if (err) throw err
-            debug("Collection forms is now on db!")
+            debug("Collection forms is now in db!")
         });
-        state.db.createCollection("users", function (err, res) {
+        state.db.createCollection("users").then(value=>{
+            debug("Collection users is now in db!")
+        }).catch(err=>{
             if (err) throw err
-            debug("Collection users is now on db!")
         });
         state.db.createCollection("polygons",function(err,res){
             if(err) throw err;
-            debug("Collection polygons is now on db!")
+            debug("Collection polygons is now in db!")
         })
-        done()
+        state.db.createCollection("form_answers").then((value)=>{
+            debug("Collection form_answers is now in db!")
+        }).catch((err)=>{
+            throw err;
+        })
+        
     })
 }
 
