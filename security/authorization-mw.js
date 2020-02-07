@@ -15,7 +15,7 @@ router.use(function (req, res, next) {
     let token = req.header('Authorization')
 
     if (token != undefined && token.startsWith(TOKEN_PREFIX)) {
-        token = token.substring(TOKEN_PREFIX.length, token.length - 1)
+        token = token.substring(TOKEN_PREFIX.length, token.length)
     } else {
         putPermissionsToReq(req, roles.VISITOR)
         next()

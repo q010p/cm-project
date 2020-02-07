@@ -25,7 +25,7 @@ router.get('/forms', function (req, res) {
 })
 
 
-router.put('/forms', permit(roles.ADMIN, roles.CONTROL_CENTER_AGENT, roles.FIELD_AGENT, roles.VISITOR), function (req, res) {
+router.put('/forms', permit(roles.ADMIN, roles.CONTROL_CENTER_AGENT, roles.FIELD_AGENT), function (req, res) {
     debug(`put request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.body)}`)
     db.collection('forms').insertOne(req.body, function (err, dbRes) {
         if (err) res.send('something went wrong')
@@ -33,7 +33,8 @@ router.put('/forms', permit(roles.ADMIN, roles.CONTROL_CENTER_AGENT, roles.FIELD
     })
 })
 
-router.get('/forms/:formId', permit(roles.FIELD_AGENT), function (req, res) {
+//permit(roles.FIELD_AGENT), 
+router.get('/forms/:formId', function (req, res) {
     debug(`get request to ${req.baseUrl + req.url} ${req.params.formId}`)
     let formObjectId
     try {
@@ -56,13 +57,19 @@ router.get('/forms/:formId', permit(roles.FIELD_AGENT), function (req, res) {
 
 })
 
-router.post('/forms/answer', permit(roles.FIELD_AGENT), function (req, res) {
+router.post('/forms/answer',permit(roles.FIELD_AGENT), function (req, res) {
     debug(`post request to ${req.baseUrl + req.url} endpoint with below body :\n${JSON.stringify(req.body)}`)
     db.collection('form_answers').insertOne({
         user: {
             "$ref": "users",
-            "$id": ObjectId(req.user.userId),
+            "$id": ObjectId(req.user.userId)
         },
+        form:{
+            "$ref": "forms",
+            "$id": ObjectId(req.body.formId),
+            "$db": "test"
+        }
+        ,
         answers: req.body
     })
     res.send('Welcome to CM')
@@ -70,8 +77,27 @@ router.post('/forms/answer', permit(roles.FIELD_AGENT), function (req, res) {
 
 router.delete('/forms', function (req, res) {
     debug(`delete request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.query)}`)
-    db.collection('forms').deleteOne({})
+    //db.collection('forms').deleteOne({})
     res.send('Welcome to CM')
+})
+
+
+router.get('/forms/answers',function(req,res){
+    debug(`get request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.query)}`)
+    res.send()  
+
+})
+
+router.get('/forms/answers/user/:userId',function(req,res){
+    debug(`get request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.query)}`)
+    db.collection('form_answers').find({user:{'$id':{$eq:req.params.userId}}},{}).toArray()
+    .then(function(value){
+        res.send(value)
+    })
+    .catch(function(err){
+        res.sendStatus(err)
+    })
+
 })
 
 
