@@ -57,19 +57,11 @@ router.get('/forms/:formId', function (req, res) {
 
 })
 
-router.post('/forms/answer',permit(roles.FIELD_AGENT), function (req, res) {
+router.post('/forms/answer', permit(roles.FIELD_AGENT), function (req, res) {
     debug(`post request to ${req.baseUrl + req.url} endpoint with below body :\n${JSON.stringify(req.body)}`)
     db.collection('form_answers').insertOne({
-        user: {
-            "$ref": "users",
-            "$id": ObjectId(req.user.userId)
-        },
-        form:{
-            "$ref": "forms",
-            "$id": ObjectId(req.body.formId),
-            "$db": "test"
-        }
-        ,
+        userId: ObjectId(req.user.userId),
+        formId: req.body.formId,
         answers: req.body
     })
     res.send('Welcome to CM')
@@ -82,21 +74,56 @@ router.delete('/forms', function (req, res) {
 })
 
 
-router.get('/forms/answers',function(req,res){
+router.get('/forms/answers',permit(roles.CONTROL_CENTER_AGENT), function (req, res) {
     debug(`get request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.query)}`)
-    res.send()  
-
+    db.collection('form_answers').aggregate([
+        {
+            $lookup:
+            {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'user'
+            }
+        },
+        {
+            $unwind: {
+                path: '$user',
+                includeArrayIndex: "0"
+            }
+        },
+        {
+            $group:
+            {
+                _id: '$formId',
+                //form:{$addToSet:'$form'},
+                answers: { $push: { answerId: '$_id', user: '$user', answer: '$answers' } }
+            }
+        },
+        {
+            $project:
+            {
+                'answers.user.password': 0, 'answers.user.permission': 0,'answers.answer.formId':0
+            }
+        }
+    ]).toArray()
+        .then(function (value) {
+            res.send(value)
+        })
+        .catch(function (err) {
+            res.status(500).send(err)
+        })
 })
 
-router.get('/forms/answers/user/:userId',function(req,res){
+router.get('/forms/answers/user/:userId', function (req, res) {
     debug(`get request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.query)}`)
-    db.collection('form_answers').find({user:{'$id':{$eq:req.params.userId}}},{}).toArray()
-    .then(function(value){
-        res.send(value)
-    })
-    .catch(function(err){
-        res.sendStatus(err)
-    })
+    db.collection('form_answers').find({ user: { '$id': { $eq: req.params.userId } } }, {}).toArray()
+        .then(function (value) {
+            res.send(value)
+        })
+        .catch(function (err) {
+            res.sendStatus(err)
+        })
 
 })
 
