@@ -28,5 +28,8 @@ app.use('/api', polygonsRouter)
 let usersRouter = require('./routes/users')
 app.use('/api', usersRouter)
 
+let formAnswersRouter = require('./routes/form-answers')
+app.use('/api',formAnswersRouter)
+
 
 module.exports = app;

@@ -59,13 +59,46 @@ router.get('/forms/:formId', function (req, res) {
 
 router.post('/forms/answer', permit(roles.FIELD_AGENT), function (req, res) {
     debug(`post request to ${req.baseUrl + req.url} endpoint with below body :\n${JSON.stringify(req.body)}`)
-    db.collection('form_answers').insertOne({
-        userId: ObjectId(req.user.userId),
-        formId: req.body.formId,
-        answers: req.body
-    })
-    res.send('Welcome to CM')
+    let answers = req.body
+    let formObjectId
+    try {
+        formObjectId = ObjectId(req.body.formId);
+    } catch (exception) {
+        res.status(400).send({ 'message': 'wrong form id' })
+        return
+    }
+    db.collection('forms').findOne({ _id: { $eq: formObjectId } }, {})
+        .then((value) => {
+            if (!value) {
+                res.statusCode(400).send({ message: "wrong form id" })
+            } else {
+                return db.collection('form_answers').insertOne({
+                    userId: ObjectId(req.user.userId),
+                    formId: ObjectId(req.body.formId),
+                    answers: answers
+                })
+                // let pointArr = []
+                // value.fields.forEach(element => {
+                //     if (element.type === "Location") {
+                //         pointArr.push(answers[element.name])
+                //     }
+                // });
+                // extractPolygons(pointArr).then(function (polies) {
+                //     answers[element.name].polygons = polies
+                //     return 
+                // })
+
+            }
+        })
+        .then(function (value) {
+            res.sendStatus(200)
+        })
+     .catch(function(reason){
+         res.sendStatus(500)
+     })
 })
+
+
 
 router.delete('/forms', function (req, res) {
     debug(`delete request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.query)}`)
@@ -74,46 +107,7 @@ router.delete('/forms', function (req, res) {
 })
 
 
-router.get('/forms/answers',permit(roles.CONTROL_CENTER_AGENT), function (req, res) {
-    debug(`get request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.query)}`)
-    db.collection('form_answers').aggregate([
-        {
-            $lookup:
-            {
-                from: 'users',
-                localField: 'userId',
-                foreignField: '_id',
-                as: 'user'
-            }
-        },
-        {
-            $unwind: {
-                path: '$user',
-                includeArrayIndex: "0"
-            }
-        },
-        {
-            $group:
-            {
-                _id: '$formId',
-                //form:{$addToSet:'$form'},
-                answers: { $push: { answerId: '$_id', user: '$user', answer: '$answers' } }
-            }
-        },
-        {
-            $project:
-            {
-                'answers.user.password': 0, 'answers.user.permission': 0,'answers.answer.formId':0
-            }
-        }
-    ]).toArray()
-        .then(function (value) {
-            res.send(value)
-        })
-        .catch(function (err) {
-            res.status(500).send(err)
-        })
-})
+
 
 router.get('/forms/answers/user/:userId', function (req, res) {
     debug(`get request to ${req.baseUrl + req.url} endpoint with below params :\n${JSON.stringify(req.query)}`)
